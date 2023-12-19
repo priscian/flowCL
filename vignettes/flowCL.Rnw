@@ -1,0 +1,152 @@
+%\VignetteIndexEntry{flowCL package}
+%\VignetteKeywords{Preprocessing,statistics}
+
+\documentclass{article}
+
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{cite, hyperref}
+\usepackage{Sweave}
+
+\usepackage[nolist]{acronym}
+\usepackage{url}
+\usepackage{verbatim}
+
+\usepackage{etoolbox}
+\makeatletter
+\preto{\@verbatim}{\topsep=5pt \partopsep=5pt }
+\makeatother
+
+\usepackage{layout}
+\oddsidemargin = 15pt
+\textwidth = 440pt
+
+\title{{\it \textbf{flowCL}}: Semantic labelling of flow cytometric cell populations}
+\author{Justin Meskas}
+
+\begin{document}
+\setkeys{Gin}{width=1.0\textwidth, height=1.1\textwidth}
+
+\maketitle
+\begin{center}
+{\tt justinmeskas@hotmail.com}
+\end{center}
+
+\textnormal{\normalfont}
+
+\tableofcontents
+
+% \newpage
+% 
+% \section{Licensing}
+% 
+% Under the Artistic License, you are free to use and redistribute this software.
+% 
+% 
+% \section{Loading the Library}
+% 
+% To install {\it \textbf{flowCL}} type {\it install.packages(``BiocManager'')} into R and then type \\{\it BiocManager::install(``flowCL'')}. For more information on installation guidelines, see the Bioconductor and the CRAN websites. Once installed, to load the library, type the following into R:
+% <<loadlibs, echo=TRUE, fig=FALSE, results=hide>>=
+% library("flowCL")
+% @
+% 
+% \section{Running {\it \textbf{flowCL}}}
+% \subsection{Introduction}
+% Given a cell type, one can use a cell ontology to discover which markers are used to uniquely identify that particular cell type. In the reverse situation, how can one find an appropriate cell type with a given phenotype (or list of markers)? {\it \textbf{flowCL}} matches a phenotype to a cell type from the cell ontology. If the match is not unique, then the best alternatives are returned. Markers are input followed with a \textbf{+}, \textbf{-}, \textbf{hi} or \textbf{lo}. The \textbf{+} stands for {\it has plasma membrane part}, the \textbf{-} stands for {\it lacks plasma membrane part}, the \textbf{hi} stands for {\it has high plasma membrane amount}, and the \textbf{lo} stands for {\it has low plasma membrane amount}. For example, CD8\textbf{+} will search for cell types that {\it has plasma membrane part} of CD8. Synonyms of tags are also accepted: \textbf{low}, \textbf{dim} and \textbf{- -} for \textbf{lo}, and \textbf{high}, \textbf{bri}, \textbf{bright} and \textbf{++} as synonyms for \textbf{hi}.
+% 
+% 
+% {\it \textbf{flowCL}} executes queries against the Cell Ontology (CL), available at http://cellontology.org. The CL file is hosted on a triplestore, i.e., a database for storage and retrieval of Resource Description Framework (RDF) triples. The SPARQL endpoint at http://cell.ctde.net:8080/openrdf-sesame/repositories/CL is used to execute the SPARQL queries retrieving the correct matches from the CL. While other SPARQL endpoints can be used, users should be aware that in our case the CL file has been reasoned upon, and resulting extra inferred axioms have been added to the triplestore, providing a more complete result set.
+% 
+% \subsection{Archive}
+% A folder called ``flowCL$\_$results'' will be created in the current directory. In this folder a file called ``listPhenotypes.csv'' is created. This file lists the results of {\it \textbf{flowCL}}, and is the same as what is returned in the \$Table section of the returned data. In addition, tree diagrams are created and saved as ``.pdf'' files and these show the cell dependency of the matched cell types. The code will slowly build an archive of information in ``$[$current directory$]$/flowCL$\_$results/'' inside the folders of ``parents'', ``parents$\_$query'', ``results'' and ``reverse$\_$query''. Accessing this archive is much faster than querying every time, however, if the ontology gets updated the code will use the now old data from these folders. To make sure the code is as up to date as possible the archive should be reset every once in a while.
+% 
+% For the sake of time, a pre-loaded archive can be created from a data file in {\it \textbf{flowCL}}. To load this archive, enter the following:
+% 
+% \begin{small}
+% <<label=Load_archive, fig=FALSE, results=hide>>=
+% flowCL("Archive")
+% @
+% \end{small}
+% 
+% This pre-loaded archive has the possibility of being outdated. This archive will be updated by the maintainer, along with the vignette, whenever the ontology is updated. More discussion of this is in the ``Last Comments'' section. The current version was updated last on January $4^{th}$ 2018. To check that the version is up to date run:
+% 
+% \begin{small}
+% <<label=Date, fig=FALSE, results=hide>>=
+% flowCL("Date")
+% @
+% \end{small}
+% 
+% If the returned date matches or is prior to the one above, then the pre-loaded archive is the most up to date. Please note that the user can skip this section altogether and {\it \textbf{flowCL}} will always give the most current archive. The down side is the code will take time every time there is something new to query while building an archive.
+% 
+% \subsection{Simple Example}
+% The simplest example of {\it \textbf{flowCL}} is to enter in one phenotype:
+% 
+% \begin{small}
+% <<label=CCR7+CD45RA+_with_visual, fig=TRUE, include=FALSE>>=
+% Res <- flowCL("CCR7+CD45RA+")
+% Res$Table
+% tmp <- Res$'CCR7+CD45RA+'
+% plot(tmp[[1]], nodeAttrs=tmp[[2]], edgeAttrs=tmp[[3]], attrs=tmp[[4]])
+% @
+% \end{small}
+% 
+% \begin{figure}[htbp] \begin{center}
+%     \includegraphics{flowCL-CCR7+CD45RA+_with_visual}
+%     \caption{Tree diagram of the cell hierarchy when querying with phenotype: ``CCR7+CD45RA+''}
+%     \label{fig:one}
+% \end{center} \end{figure}
+% 
+% A list containing N + 5 elements was returned into Res, where N is the number of phenotypes queried, in this case N = 1. Each of these N elements contains information for plotting the results. The other five elements show the cell labels (\$Cell\_Labels), the matching markers in a list form (\$Marker\_Groups) and a bracket form (\$Markers), ranking scores (\$Ranking) and a table (\$Table). The cell labels element lists the cell labels in order of highest score based on their ranking, which is in a form easily extracted and used by other R packages and functions. \$Marker\_Groups and \$Markers list markers that were queried and markers that are used to define the certain cell types. In \$Markers these markers are displayed in the form of \{ \textbf{A} \} \textbf{B} ( \textbf{C} ) [ \textbf{D} ]. \textbf{A} and \textbf{B} together make up the markers input for the query. \textbf{B}, \textbf{C} and \textbf{D} together are the markers that make up the definition of the particular cell type. \textbf{C} lists the markers that were part of the experiment that were not part of the query, while \textbf{D} lists all other markers that make up the cell type that were not part of the experimental markers. \textbf{A} lists all the markers in the input for the query that were not required for that particular cell type.
+% 
+% The table from $Res\$Table$ shows many properties of the phenotype queried. The name of the markers in the ontology are shown, in this case ``C-C chemokine receptor type 7'' and ``receptor-type tyrosine-protein phosphatase C isoform CD45RA'' for CCR7 and CD45RA, respectively. The experiment markers are shown as well. These are a list of all the markers used in the experiment. {\it \textbf{flowCL}} will inform the user of which additional markers, which are in the experiment markers and are not in the input markers, that would better define a particular cell type. Hence, the user can refine her/his cell population to achieve a more accurate population. A successful match is also specified given that there are cell types that contain all the markers queried and only those markers. The 1) - 5) in the next six sections of the table represent the five cell types that are considered matches.
+% 
+% In Figure \ref{fig:one}, a tree diagram shows the cell hierarchy that is dependent on both CCR7+ and CD45RA+. There are five cell types that contain both markers. The black arrows are defined as ``is a'' (ex. native cell ``is a'' cell). The coloured arrows are the inverse of {\it has/lacks plasma membrane part} or {\it has high/low plasma membrane amount} (ex. native regulatory T cell {\it has plasma membrane part} CD45RA). Each marker is associated with its own colour, which makes it easier for the user to tell which cell type contains which markers. The blue nodes are the {\it has plasma membrane part} markers, while the red nodes are the {\it lacks plasma membrane part} markers. The navy blue nodes are the {\it has high plasma membrane amount} markers and the grey blue nodes are the {\it has low plasma membrane amount} markers. The green nodes are the exact matches, while the beige nodes are the partial matches.
+% 
+% 
+% \subsection{Arguments Discussion}
+% \begin{itemize}
+% 
+%     \item The main argument, ``MarkerList'', is a single conjoined marker or a list of conjoined markers that make a phenotype or phenotypes. {\it \textbf{flowCL}} will attempt to find the best cell type that contains the highest possible amount of the input markers without having too many extra markers.
+%     \item If the ``ExpMrkrLst'' argument is blank then it is set to equal ``MarkerList''. The main use of ``ExpMrkrLst'' is to list all the markers in your experiment, and if there is one that is not in ``MarkerList'' and it is part of the cell type, then {\it \textbf{flowCL}} will inform the user.
+%     \item The ``Indices'' argument allows the user to not have to change the list in ``MarkerList'' if only a subset of the list is wanted.
+%     \item The ``Verbose'' option allows the user to view the computational updates while the code is in progress. The default for ``Verbose'' is FALSE.
+%     \item If the argument called ``ResetArch'' is set to TRUE, it will first delete the entire archive and start adding data to a new one every time something is queried. Therefore, the code is slower after the archive is reset, however, the code will become faster on average with every query.
+%     \item The argument called ``KeepArch'' allows the user to remove the archive at the end of the simulation if it is set to FALSE. This is useful when the user rather not have files stored on the hard drive.
+%     \item The ``MaxHitsPht'' argument controls how many cell types are returned if there are maybe closely ranked best matched. The default is set to 5.
+%     \item The ``OntolNamesTD'' option allows for the marker nodes to display their ontology names in the tree diagrams instead of their short names (ex. ``T cell receptor co-receptor CD8'' is displayed instead of ``CD8''). The default for ``OntolNamesTD'' is FALSE.
+%     \item The ``VisualSkip'' argument in {\it \textbf{flowCL}} can be used if the user does not want the visual results. This will reduce the computational time.
+% \end{itemize}
+% 
+% 
+% \subsection{Scoring}
+% 
+% The ranking score is calculated by adding all the markers that were queried that are also part of the cell type, possibly subtracting a penalty, and dividing the number of markers that define that cell type. The penalty of -2 is given for every marker that was queried that does not define that cell type.  In equation form (amount of each): (\textbf{B} - 2*\textbf{A} - 2*\textbf{Z}) / ( \textbf{B} + \textbf{C} + \textbf{D} ), where \textbf{Z} is the number of markers that are queried with the wrong tag. Currently if Z is not 0 then the cell type is removed. However, if that is the only cell type left, it will not be removed and the \textbf{Z} penalty will apply both in \textbf{A} and \textbf{Z}. The ranking score of 1, the maximum, can only be obtained if every marker in the query was used in the definition of the cell type, i.e. an exact match (only \textbf{B} markers).
+% 
+% \subsection{Cell Label Example}
+% In many cases {\it \textbf{flowCL}} will only be used to extract the best possible cell label given a set of markers. The following code shows an example of this:
+% 
+% \begin{small}
+% <<label=CD3-CD19-CD20-CD14+, fig=FALSE, include=FALSE>>=
+% x <-"CD3-CD19-CD20-CD14+"
+% Res <- flowCL(x)
+% Res$Cell_Label[[x]][[1]]
+% @
+% \end{small}
+% 
+% The user should note that the returned value could be one of many possible best cell labels. To access the other possible best cell labels the ``1'' in $Res\$Cell\_Label[[x]][[1]]$ can be changed to a higher index.
+% \subsection{Last Comments}
+% 
+% \begin{itemize}
+% \item
+% If the user wants all possible HIPC results and all HIPC tree diagrams, then the command of ``flowCL(``'')'' or ``flowCL(``HIPC'')'' will achieve this. All the defaults are set to run the HIPC phenotypes and their individual markers. Running the full code with no archive can take up to 20 minutes.
+% \item
+% There are two packages that {\it \textbf{flowCL}} depends upon. The first is {\it \textbf{SPARQL}}, which is used when retrieving cell ontology data. The other is {\it \textbf{Rgraphviz}}, which is used when creating the tree diagrams.
+% \item
+% 
+% The user should note that since the ontology can be and will be updated, the R results shown in this vignette, both the figure and the static text, may not match a live run of {\it \textbf{flowCL}}. Also the data files containing a pre-loaded archive can be outdated. The maintainer will try to keep the vignette and data files as up to date as possible. The data files as well as text and the figures in the examples from this vignette describe results from the cell ontology that was last updated on December $11^{th}$ 2017.
+% 
+% \end{itemize}
+% % \bibliographystyle{plain}
+% % \bibliography{flowCL}
+
+\end{document}

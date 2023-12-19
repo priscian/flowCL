@@ -1,0 +1,60 @@
+0.99.0:
++ This is the submitted version of the package.
+0.99.1: 
++ Changes done based on suggestions from the reviewer.
+0.99.2: 
++ Added Parents_query_archive.rda and Parents_Names.rda to save time querying by already having a pre-loaded archive.
+0.99.3: 
++ Minor changes with the unit test and RECOMMENDED comments from BiocCheck.
+1.0.0: 
++ Same as previous. Bumped by BioConductor.
+1.1.0: 
++ Same as previous. Bumped by BioConductor.
+1.2.0: 
++ Added hi/high/bri/bright and lo/low/dim as inputs. Added warning messages for incorrect input.
+1.3.0: 
++ Added a scoring system. Returns all markers that were not queried for each high ranked cell label. Archive is larger, and loaded in a more automatic way.
+1.3.1: 
++ Fixed a Note and a Warning. Added comments.
+1.3.2: 
++ Extended archive. Removes cell labels that have contradicting tags as input.
+1.4.0: 
++ Same as previous. Bumped by BioConductor.
+1.5.0: 
++ Same as previous. Bumped by BioConductor.
+1.5.1: 
++ Explanded on one marker queries. Uses sesame to find direct sub classes only. 
+1.9.1: 
++ Fixed two bugs.
+1.11.1: 
++ Fixed one bug involving has_pmp: <http://purl.obolibrary.org/obo/RO_0002104> that occured with the updated ontology. Fixed bug where tag wasn't showing for markers in the (C) category of $Markers. Updated data file and vignette. Fixed bug where a direct query to the markers is no longer needed because of the change in the ontology. Changed CompInfo to Verbose to be more consistent with other packages.
+1.11.2: 
++ Small bug with R version 3.3.X when using cbind. 
+1.12.0: 
++ Same as previous. Bumped by BioConductor.
+1.13.0: 
++ Same as previous. Bumped by BioConductor.
+1.14.0: 
++ Same as previous. Bumped by BioConductor.
+1.15.0: 
++ Same as previous. Bumped by BioConductor.
+1.16.0: 
++ Same as previous. Bumped by BioConductor.
+1.17.0: 
++ Same as previous. Bumped by BioConductor.
+1.17.1: 
++ Ontology has @en attachement to symbolize an english language addition. flowCL was updated to handle this addition. 
+1.17.2: 
++ 1.17.1 did not install. Conflicts in supportingFunction were not resolved.
+1.18.0: 
++ Same as previous. Bumped by BioConductor.
+1.19.0: 
++ Same as previous. Bumped by BioConductor.
+1.19.1: 
++ Changed how NEWS is displayed.
+1.21.0: 
++ Same as previous. Bumped by BioConductor.
+1.21.1: 
++ Changed endpoint in man pages, and added ImmunoOncology as a biocViews tag.
+1.29.1: 
++ Endpoint no longer exists. Please email Justin at justinmeskas@gmail.com to request a fix.

@@ -1,0 +1,16 @@
+Package: flowCL
+Type: Package
+Title: Semantic labelling of flow cytometric cell populations
+Version: 1.30.0
+#: Date: 2018-12-01
+Author: Justin Meskas, Radina Droumeva, Jim Java
+Maintainer: Jim Java <james.j.java@gmail.com>
+Depends: R (>= 3.4), Rgraphviz, SPARQL
+Imports: methods, grDevices, utils, graph, magrittr
+Description: Semantic labeling of flow cytometric cell populations.
+biocViews: FlowCytometry, ImmunoOncology
+Suggests: RUnit, BiocGenerics
+License: Artistic-2.0
+Encoding: UTF-8
+LazyLoad: yes
+RoxygenNote: 7.2.3
